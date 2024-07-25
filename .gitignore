@@ -1,0 +1,8 @@
+.env
+node_modules
+pack
+pack.zip
+pack-temp.zip
+dist
+logs
+pack-sha1
