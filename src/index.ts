@@ -1,41 +1,19 @@
 import express from 'express';
 import { config } from 'dotenv';
 import logger from './logger';
-import { getServerIp, getSha1Hash, zipDirectory } from './utils';
+import { getServerIp, getSha1Hash } from './utils';
 import { join } from 'path';
-import { ensureDirSync, ensureFileSync, existsSync, renameSync, rmSync, writeFileSync } from 'fs-extra';
+import { ensureDirSync, ensureFileSync } from 'fs-extra';
 config();
 
 const packZipPath = join(__dirname, '../pack.zip');
-const tempPackZipPath = join(__dirname, '../pack-temp.zip');
 const packSHA1Path = join(__dirname, '../pack-sha1');
 const packDirPath = join(__dirname, '../pack');
 
-let hash = '';
+ensureDirSync(packDirPath);
+ensureFileSync(packSHA1Path);
 
-if (existsSync(packZipPath)) {
-    hash = getSha1Hash(packZipPath);
-}
-
-if (existsSync(tempPackZipPath)) rmSync(tempPackZipPath);
-
-zipDirectory(packDirPath, tempPackZipPath).then(() => {
-    const tempHash = getSha1Hash(tempPackZipPath);
-    if (tempHash !== hash) {
-        hash = tempHash;
-        if (existsSync(packZipPath)) rmSync(packZipPath);
-        renameSync(tempPackZipPath, packZipPath);
-        writeFileSync(packSHA1Path, hash);
-    } else {
-        rmSync(tempPackZipPath);
-    }
-
-    logger.log({
-        level: 'info',
-        message: `SHA1: ${hash}`,
-        color: 'blueBright',
-    });
-});
+const hash = getSha1Hash(packZipPath);
 
 logger.log({
     level: 'init',
@@ -44,9 +22,6 @@ logger.log({
 });
 
 const PORT = process.env.ENV === 'prod' ? process.env.PORT : parseInt(process.env.PORT) + 1000 || 5600;
-
-ensureDirSync(packDirPath);
-ensureFileSync(packSHA1Path);
 
 const app = express();
 
@@ -69,5 +44,11 @@ app.listen(PORT, () => {
         level: 'init',
         message: `Listening at http://${serverIp}:${PORT}`,
         color: 'greenBright',
+    });
+
+    logger.log({
+        level: 'init',
+        message: `Hash: ${hash}`,
+        color: 'blueBright',
     });
 });

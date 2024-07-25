@@ -9,7 +9,8 @@
     "deploydev": "cross-env ENV=\"dev\" node --trace-warnings dist/index.js",
     "build": "tsc",
     "cleanbuild": "rm -rfd dist && npm run build",
-    "cleanstart": "npm run cleanbuild && npm run deploy"
+    "cleanstart": "npm run cleanbuild && npm run deploy",
+    "zip": "tsx src/createZip.ts"
   },
   "keywords": [],
   "author": "oogooro",
